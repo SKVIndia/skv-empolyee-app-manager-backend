@@ -1,7 +1,7 @@
 services:
   - type: web
     name: skv-flask-uploader
-    runtime: python-3.11
+    runtime: python
     buildCommand: pip install -r requirements.txt
     startCommand: gunicorn app:app
     env: python
@@ -11,3 +11,4 @@ services:
     envVars:
       - key: DATABASE_URL
         value: postgresql://neondb_owner:npg_yliZ19YbeQhV@ep-mute-cloud-a1ecwvbi-pooler.ap-southeast-1.aws.neon.tech/skv-employees?sslmode=require&channel_binding=require
+
