@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import os
-import sys
 import csv
 import io
 import openpyxl
@@ -10,6 +9,7 @@ from flask_cors import CORS
 from dotenv import load_dotenv
 from werkzeug.utils import secure_filename
 
+# Load environment variables
 load_dotenv()
 
 app = Flask(__name__)
@@ -22,6 +22,8 @@ DATABASE_URL = os.getenv(
     "DATABASE_URL",
     "postgresql://neondb_owner:npg_yliZ19YbeQhV@ep-mute-cloud-a1ecwvbi-pooler.ap-southeast-1.aws.neon.tech/skv-employees?sslmode=require&channel_binding=require"
 )
+
+PORT = int(os.getenv("PORT", 5000))
 
 
 @app.route("/", methods=["GET"])
@@ -46,15 +48,17 @@ def upload_file():
         create_neon_database(file_path)
         return jsonify({"message": "✅ Upload and database sync successful"}), 200
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         return jsonify({"error": str(e)}), 500
 
 
 def create_neon_database(file_path: str):
     ext = file_path.split('.')[-1].lower()
 
-    # Load CSV or XLSX
     data = []
     headers = []
+
     if ext == 'csv':
         with open(file_path, newline='', encoding='utf-8') as f:
             reader = csv.DictReader(f)
