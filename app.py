@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 import os
 import csv
-import io
 import openpyxl
 import pg8000
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from dotenv import load_dotenv
 from werkzeug.utils import secure_filename
+from urllib.parse import urlparse
 
 # Load environment variables
 load_dotenv()
@@ -22,7 +22,6 @@ DATABASE_URL = os.getenv(
     "DATABASE_URL",
     "postgresql://neondb_owner:npg_yliZ19YbeQhV@ep-mute-cloud-a1ecwvbi-pooler.ap-southeast-1.aws.neon.tech/skv-employees?sslmode=require&channel_binding=require"
 )
-
 PORT = int(os.getenv("PORT", 5000))
 
 
@@ -80,7 +79,16 @@ def create_neon_database(file_path: str):
     user_cols = ['employee_email', 'password']
     app_cols = [col for col in headers if col not in user_cols]
 
-    conn = pg8000.connect(dsn=DATABASE_URL)
+    # Parse the DATABASE_URL
+    parsed_url = urlparse(DATABASE_URL)
+    conn = pg8000.connect(
+        user=parsed_url.username,
+        password=parsed_url.password,
+        host=parsed_url.hostname,
+        port=parsed_url.port or 5432,
+        database=parsed_url.path.lstrip("/"),
+        ssl_context=True
+    )
     cur = conn.cursor()
 
     cur.execute("DROP TABLE IF EXISTS permissions;")
@@ -116,7 +124,10 @@ def create_neon_database(file_path: str):
         for app_col in app_cols:
             link = row.get(app_col)
             if link and link.lower() not in ["n/a", "none", "null", ""]:
-                cur.execute("INSERT INTO permissions (email, app_name, app_link) VALUES (%s, %s, %s);", (email, app_col, link))
+                cur.execute(
+                    "INSERT INTO permissions (email, app_name, app_link) VALUES (%s, %s, %s);",
+                    (email, app_col, link)
+                )
 
     conn.commit()
     cur.close()
