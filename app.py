@@ -18,7 +18,7 @@ CORS(app)
 UPLOAD_FOLDER = "./uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-DATABASE_URL = os.getenv("DATABASE_URL", "")
+DATABASE_URL = os.getenv("DATABASE_URL | postgresql://neondb_owner:npg_yliZ19YbeQhV@ep-mute-cloud-a1ecwvbi-pooler.ap-southeast-1.aws.neon.tech/skv-employees?sslmode=require&channel_binding=require", "")
 PORT = int(os.environ.get("PORT", 5000))
 
 
